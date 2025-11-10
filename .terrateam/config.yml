@@ -1,0 +1,41 @@
+enabled: true
+version: "1"
+
+automerge:
+  enabled: true
+  delete_branch: false
+
+when_modified:
+  autoplan: true
+  autoapply: false
+
+# Directory-specific tags make it easy to target Terrateam commands
+# and bind each directory to its own GitHub Environment for secrets.
+dirs:
+  env-dev:
+    tags: [env-dev, dev]
+    when_modified:
+      file_patterns: ["${DIR}/**/*.tf", "${DIR}/**/*.tfvars"]
+  env-prod:
+    tags: [env-prod, prod]
+    when_modified:
+      file_patterns: ["${DIR}/**/*.tf", "${DIR}/**/*.tfvars"]
+
+workflows:
+  - tag_query: env-dev
+    environment: env-dev
+    plan:
+      - type: init
+      - type: plan
+    apply:
+      - type: init
+      - type: apply
+
+  - tag_query: env-prod
+    environment: env-prod
+    plan:
+      - type: init
+      - type: plan
+    apply:
+      - type: init
+      - type: apply
